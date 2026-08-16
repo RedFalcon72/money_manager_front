@@ -149,7 +149,8 @@ export default function Dashboard() {
   const pieData = categoryData.map((d) => ({
     name: d.category,
     value: Math.abs(d.total),
-              aria-label="開始日"
+              aria-label="開始日"
+
   }));
 
   return (
@@ -260,6 +261,22 @@ export default function Dashboard() {
 
           <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100 mt-4">
             <h2 className="text-lg font-bold mb-4 text-gray-800">最近の取引</h2>
+              <thead>
+                <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+                  <th scope="col" className="py-2 font-medium">
+                    日付
+                  </th>
+                  <th scope="col" className="py-2 font-medium">
+                    内容
+                  </th>
+                  <th scope="col" className="py-2 font-medium">
+                    カテゴリ
+                  </th>
+                  <th scope="col" className="py-2 font-medium text-right">
+                    金額
+                  </th>
+                </tr>
+              </thead>
             <table className="w-full">
               <tbody>
                 {recentTransactions.map((t) => (
