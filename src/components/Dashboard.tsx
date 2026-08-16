@@ -21,9 +21,21 @@ type CategoryData = {
   total: number;
 };
 
+type Transaction = {
+  id: number;
+  date: string;
+  amount: number;
+  description: string;
+  category: string;
+  source: string;
+};
+
 export default function Dashboard() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
+    [],
+  );
 
   useEffect(() => {
     const start = "2026-06-01";
@@ -38,6 +50,12 @@ export default function Dashboard() {
     )
       .then((res) => res.json())
       .then((data) => setCategoryData(data));
+
+    fetch(
+      `http://127.0.0.1:8000/transactions?start_date=${start}&end_date=${end}`,
+    )
+      .then((res) => res.json())
+      .then((data) => setRecentTransactions(data.slice(-5).reverse()));
   }, []);
 
   const pieData = categoryData.map((d) => ({
@@ -86,10 +104,37 @@ export default function Dashboard() {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => `¥${value.toLocaleString()}`}
+            formatter={(value) => {
+              const numericValue = Array.isArray(value)
+                ? Number(value[0] ?? 0)
+                : Number(value ?? 0);
+
+              return `¥${numericValue.toLocaleString()}`;
+            }}
           />
           <Legend />
         </PieChart>
+      </div>
+
+      <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100 mt-4">
+        <h2 className="text-lg font-bold mb-4 text-gray-800">最近の取引</h2>
+        <table className="w-full">
+          <tbody>
+            {recentTransactions.map((t) => (
+              <tr key={t.id} className="border-b border-gray-100 last:border-0">
+                <td className="py-2 text-sm text-gray-500">{t.date}</td>
+                <td className="py-2 text-sm">{t.description}</td>
+                <td className="py-2 text-sm text-gray-500">{t.category}</td>
+                <td
+                  className="py-2 text-sm text-right font-bold"
+                  style={{ color: t.amount > 0 ? "#ea4335" : "#1a73e8" }}
+                >
+                  ¥{Math.abs(t.amount).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
