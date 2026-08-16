@@ -59,98 +59,55 @@ export default function Dashboard() {
         ? getMonthRange(-1)
         : { start: customStart, end: customEnd };
 
-  const API_BASE =
-
-    import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-
+  const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
   useEffect(() => {
     const { start, end } = range;
     const controller = new AbortController();
 
-
     // Reset UI while new range data is loading.
-
     setSummary(null);
-
     setCategoryData([]);
-
     setRecentTransactions([]);
 
-
     const fetchJson = async <T,>(url: string): Promise<T> => {
-
       const res = await fetch(url, { signal: controller.signal });
-
       if (!res.ok) {
-
         throw new Error(`Request failed: ${res.status} ${res.statusText}`);
-
       }
-
       return (await res.json()) as T;
-
     };
 
-
     (async () => {
-
       try {
-
         const [summaryRes, categoryRes, txRes] = await Promise.all([
-
           fetchJson<Summary>(
-
             `${API_BASE}/summary?start_date=${start}&end_date=${end}`,
-
           ),
-
           fetchJson<CategoryData[]>(
-
             `${API_BASE}/summary/category?start_date=${start}&end_date=${end}`,
-
           ),
-
           fetchJson<Transaction[]>(
-
             `${API_BASE}/transactions?start_date=${start}&end_date=${end}`,
-
           ),
-
         ]);
 
-
-
         setSummary(summaryRes);
-
         setCategoryData(categoryRes);
-
         setRecentTransactions(txRes.slice(-5).reverse());
-
       } catch (e) {
-
         if ((e as { name?: string }).name !== "AbortError") {
-
           console.error(e);
-
         }
-
       }
-
     })();
 
-
-
     return () => controller.abort();
-
   }, [range.start, range.end]);
 
   const pieData = categoryData.map((d) => ({
     name: d.category,
     value: Math.abs(d.total),
-              aria-label="開始日"
-
   }));
 
   return (
@@ -192,6 +149,7 @@ export default function Dashboard() {
               type="date"
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
+              aria-label="開始日"
               className="border border-gray-200 rounded px-2 py-1 text-sm"
             />
             <span className="text-sm text-gray-500">〜</span>
@@ -199,6 +157,7 @@ export default function Dashboard() {
               type="date"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
+              aria-label="終了日"
               className="border border-gray-200 rounded px-2 py-1 text-sm"
             />
           </>
@@ -261,23 +220,23 @@ export default function Dashboard() {
 
           <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100 mt-4">
             <h2 className="text-lg font-bold mb-4 text-gray-800">最近の取引</h2>
-              <thead>
-                <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
-                  <th scope="col" className="py-2 font-medium">
-                    日付
-                  </th>
-                  <th scope="col" className="py-2 font-medium">
-                    内容
-                  </th>
-                  <th scope="col" className="py-2 font-medium">
-                    カテゴリ
-                  </th>
-                  <th scope="col" className="py-2 font-medium text-right">
-                    金額
-                  </th>
-                </tr>
-              </thead>
             <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+                  <th scope="col" className="py-2 font-medium">
+                    日付
+                  </th>
+                  <th scope="col" className="py-2 font-medium">
+                    内容
+                  </th>
+                  <th scope="col" className="py-2 font-medium">
+                    カテゴリ
+                  </th>
+                  <th scope="col" className="py-2 font-medium text-right">
+                    金額
+                  </th>
+                </tr>
+              </thead>
               <tbody>
                 {recentTransactions.map((t) => (
                   <tr
