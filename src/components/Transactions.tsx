@@ -14,7 +14,12 @@ function getMonthRange(offset: number) {
   const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
   const start = new Date(target.getFullYear(), target.getMonth(), 1);
   const end = new Date(target.getFullYear(), target.getMonth() + 1, 0);
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const fmt = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
   return { start: fmt(start), end: fmt(end) };
 }
 
@@ -39,7 +44,7 @@ export default function Transactions() {
     setError(null);
 
     fetch(
-      `${API_BASE}/transactions?start_date=${startDate}&end_date=${endDate}`,
+      `${API_BASE}/transactions?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`,
       { signal: controller.signal },
     )
       .then((res) => {
@@ -74,11 +79,12 @@ export default function Transactions() {
       categoryFilter === "すべて"
         ? transactions
         : transactions.filter((t) => t.category === categoryFilter);
-    return [...list].sort((a, b) => (a.date < b.date ? 1 : -1));
+    return [...list].sort((a, b) => b.date.localeCompare(a.date));
   }, [transactions, categoryFilter]);
 
   const handleCategoryChange = async (id: number, newCategory: string) => {
     setSavingId(id);
+    setError(null);
     try {
       const res = await fetch(
         `${API_BASE}/transactions/${id}/category?category=${encodeURIComponent(newCategory)}`,
