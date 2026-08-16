@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
+import Transactions from "./components/Transactions";
 
 function App() {
   return (
@@ -21,10 +22,7 @@ function App() {
         </header>
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route
-            path="/transactions"
-            element={<div className="p-6">取引一覧（準備中）</div>}
-          />
+          <Route path="/transactions" element={<Transactions />} />
           <Route
             path="/import"
             element={<div className="p-6">インポート（準備中）</div>}
