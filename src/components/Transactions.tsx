@@ -14,12 +14,16 @@ function getMonthRange(offset: number) {
   const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
   const start = new Date(target.getFullYear(), target.getMonth(), 1);
   const end = new Date(target.getFullYear(), target.getMonth() + 1, 0);
-  const fmt = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
+  const fmt = (d: Date) => {
+    const y = d.getFullYear();
+
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+
+    const day = String(d.getDate()).padStart(2, "0");
+
+    return `${y}-${m}-${day}`;
+  };
+
   return { start: fmt(start), end: fmt(end) };
 }
 
@@ -44,7 +48,8 @@ export default function Transactions() {
     setError(null);
 
     fetch(
-      `${API_BASE}/transactions?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`,
+      `${API_BASE}/transactions?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`,
+
       { signal: controller.signal },
     )
       .then((res) => {
@@ -79,12 +84,13 @@ export default function Transactions() {
       categoryFilter === "すべて"
         ? transactions
         : transactions.filter((t) => t.category === categoryFilter);
-    return [...list].sort((a, b) => b.date.localeCompare(a.date));
+    return [...list].sort((a, b) => b.date.localeCompare(a.date));
   }, [transactions, categoryFilter]);
 
   const handleCategoryChange = async (id: number, newCategory: string) => {
     setSavingId(id);
-    setError(null);
+    setError(null);
+
     try {
       const res = await fetch(
         `${API_BASE}/transactions/${id}/category?category=${encodeURIComponent(newCategory)}`,
@@ -114,36 +120,41 @@ export default function Transactions() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-lg font-bold mb-4 text-gray-800">取引一覧</h1>
+      <h1 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
+        取引一覧
+      </h1>
 
-      <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100 mb-4 flex flex-wrap items-center gap-3">
+      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700 mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             aria-label="開始日"
-            className="border border-gray-200 rounded px-2 py-1 text-sm"
+            className="border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
-          <span className="text-sm text-gray-500">〜</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">〜</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             aria-label="終了日"
-            className="border border-gray-200 rounded px-2 py-1 text-sm"
+            className="border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <label htmlFor="category-filter" className="text-sm text-gray-500">
+          <label
+            htmlFor="category-filter"
+            className="text-sm text-gray-500 dark:text-gray-400"
+          >
             カテゴリ
           </label>
           <select
             id="category-filter"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="border border-gray-200 rounded px-2 py-1 text-sm"
+            className="border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             {categories.map((c) => (
               <option key={c} value={c}>
@@ -155,20 +166,22 @@ export default function Transactions() {
       </div>
 
       {error && (
-        <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100 mb-4 text-sm text-[#ea4335]">
+        <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700 mb-4 text-sm text-[#ea4335]">
           {error}
         </div>
       )}
 
-      <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100">
+      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-100 dark:border-gray-700">
         {loading ? (
-          <p className="text-sm text-gray-500">Loading...</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
         ) : filteredTransactions.length === 0 ? (
-          <p className="text-sm text-gray-500">該当する取引がありません。</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            該当する取引がありません。
+          </p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+              <tr className="border-b border-gray-100 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
                 <th scope="col" className="py-2 font-medium">
                   日付
                 </th>
@@ -187,11 +200,13 @@ export default function Transactions() {
               {filteredTransactions.map((t) => (
                 <tr
                   key={t.id}
-                  className="border-b border-gray-100 last:border-0"
+                  className="border-b border-gray-100 dark:border-gray-700 last:border-0 text-gray-900 dark:text-gray-100"
                 >
-                  <td className="py-2 text-sm text-gray-500">{t.date}</td>
+                  <td className="py-2 text-sm text-gray-500 dark:text-gray-400">
+                    {t.date}
+                  </td>
                   <td className="py-2 text-sm">{t.description}</td>
-                  <td className="py-2 text-sm text-gray-500">
+                  <td className="py-2 text-sm text-gray-500 dark:text-gray-400">
                     {editingId === t.id ? (
                       <select
                         autoFocus
@@ -201,7 +216,7 @@ export default function Transactions() {
                         onChange={(e) =>
                           handleCategoryChange(t.id, e.target.value)
                         }
-                        className="border border-gray-200 rounded px-1 py-0.5 text-sm"
+                        className="border border-gray-200 dark:border-gray-600 rounded px-1 py-0.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       >
                         {categories
                           .filter((c) => c !== "すべて")

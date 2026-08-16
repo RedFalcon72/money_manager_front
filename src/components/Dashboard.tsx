@@ -118,7 +118,7 @@ export default function Dashboard() {
           className={`px-3 py-1 rounded text-sm ${
             mode === "thisMonth"
               ? "bg-blue-900 text-white"
-              : "bg-white border border-gray-200"
+              : "bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100"
           }`}
         >
           今月
@@ -128,7 +128,7 @@ export default function Dashboard() {
           className={`px-3 py-1 rounded text-sm ${
             mode === "lastMonth"
               ? "bg-blue-900 text-white"
-              : "bg-white border border-gray-200"
+              : "bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100"
           }`}
         >
           先月
@@ -138,7 +138,7 @@ export default function Dashboard() {
           className={`px-3 py-1 rounded text-sm ${
             mode === "custom"
               ? "bg-blue-900 text-white"
-              : "bg-white border border-gray-200"
+              : "bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100"
           }`}
         >
           カスタム
@@ -150,15 +150,15 @@ export default function Dashboard() {
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
               aria-label="開始日"
-              className="border border-gray-200 rounded px-2 py-1 text-sm"
+              className="border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
-            <span className="text-sm text-gray-500">〜</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">〜</span>
             <input
               type="date"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
               aria-label="終了日"
-              className="border border-gray-200 rounded px-2 py-1 text-sm"
+              className="border border-gray-200 dark:border-gray-600 rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
           </>
         )}
@@ -169,28 +169,28 @@ export default function Dashboard() {
       ) : (
         <>
           <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-500">収入</p>
+            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">収入</p>
               <p className="text-2xl font-bold" style={{ color: "#ea4335" }}>
                 ¥{summary.income.toLocaleString()}
               </p>
             </div>
-            <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-500">支出</p>
+            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">支出</p>
               <p className="text-2xl font-bold" style={{ color: "#1a73e8" }}>
                 ¥{Math.abs(summary.expense).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
-              <p className="text-sm text-gray-500">収支</p>
-              <p className="text-2xl font-bold text-gray-800">
+            <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+              <p className="text-sm text-gray-500 dark:text-gray-400">収支</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-gray-100">
                 ¥{summary.balance.toLocaleString()}
               </p>
             </div>
           </div>
 
-          <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">
+          <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-100 dark:border-gray-700">
+            <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
               カテゴリ別支出
             </h2>
             <PieChart width={400} height={300}>
@@ -218,11 +218,13 @@ export default function Dashboard() {
             </PieChart>
           </div>
 
-          <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100 mt-4">
-            <h2 className="text-lg font-bold mb-4 text-gray-800">最近の取引</h2>
+          <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-100 dark:border-gray-700 mt-4">
+            <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
+              最近の取引
+            </h2>
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+                <tr className="border-b border-gray-100 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
                   <th scope="col" className="py-2 font-medium">
                     日付
                   </th>
@@ -241,11 +243,15 @@ export default function Dashboard() {
                 {recentTransactions.map((t) => (
                   <tr
                     key={t.id}
-                    className="border-b border-gray-100 last:border-0"
+                    className="border-b border-gray-100 dark:border-gray-700 last:border-0 text-gray-900 dark:text-gray-100"
                   >
-                    <td className="py-2 text-sm text-gray-500">{t.date}</td>
+                    <td className="py-2 text-sm text-gray-500 dark:text-gray-400">
+                      {t.date}
+                    </td>
                     <td className="py-2 text-sm">{t.description}</td>
-                    <td className="py-2 text-sm text-gray-500">{t.category}</td>
+                    <td className="py-2 text-sm text-gray-500 dark:text-gray-400">
+                      {t.category}
+                    </td>
                     <td
                       className="py-2 text-sm text-right font-bold"
                       style={{ color: t.amount > 0 ? "#ea4335" : "#1a73e8" }}
