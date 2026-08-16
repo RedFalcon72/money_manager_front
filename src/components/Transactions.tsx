@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { loadColorScheme, getIncomeColor, getExpenseColor } from "./Settings";
 
 type Transaction = {
   id: number;
@@ -16,11 +17,8 @@ function getMonthRange(offset: number) {
   const end = new Date(target.getFullYear(), target.getMonth() + 1, 0);
   const fmt = (d: Date) => {
     const y = d.getFullYear();
-
     const m = String(d.getMonth() + 1).padStart(2, "0");
-
     const day = String(d.getDate()).padStart(2, "0");
-
     return `${y}-${m}-${day}`;
   };
 
@@ -29,6 +27,10 @@ function getMonthRange(offset: number) {
 
 export default function Transactions() {
   const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
+  const [colorScheme] = useState(loadColorScheme());
+  const incomeColor = getIncomeColor(colorScheme);
+  const expenseColor = getExpenseColor(colorScheme);
 
   const defaultRange = getMonthRange(0);
   const [startDate, setStartDate] = useState(defaultRange.start);
@@ -49,7 +51,6 @@ export default function Transactions() {
 
     fetch(
       `${API_BASE}/transactions?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}`,
-
       { signal: controller.signal },
     )
       .then((res) => {
@@ -239,7 +240,7 @@ export default function Transactions() {
                   </td>
                   <td
                     className="py-2 text-sm text-right font-bold"
-                    style={{ color: t.amount > 0 ? "#ea4335" : "#1a73e8" }}
+                    style={{ color: t.amount > 0 ? incomeColor : expenseColor }}
                   >
                     ¥{Math.abs(t.amount).toLocaleString()}
                   </td>
