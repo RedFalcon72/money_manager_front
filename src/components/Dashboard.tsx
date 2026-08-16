@@ -59,24 +59,51 @@ export default function Dashboard() {
         ? getMonthRange(-1)
         : { start: customStart, end: customEnd };
 
+  const API_BASE =
+    import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+
   useEffect(() => {
     const { start, end } = range;
+    const controller = new AbortController();
 
-    fetch(`http://127.0.0.1:8000/summary?start_date=${start}&end_date=${end}`)
-      .then((res) => res.json())
-      .then((data) => setSummary(data));
+    // Reset UI while new range data is loading.
+    setSummary(null);
+    setCategoryData([]);
+    setRecentTransactions([]);
 
-    fetch(
-      `http://127.0.0.1:8000/summary/category?start_date=${start}&end_date=${end}`,
-    )
-      .then((res) => res.json())
-      .then((data) => setCategoryData(data));
+    const fetchJson = async <T,>(url: string): Promise<T> => {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) {
+        throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+      }
+      return (await res.json()) as T;
+    };
 
-    fetch(
-      `http://127.0.0.1:8000/transactions?start_date=${start}&end_date=${end}`,
-    )
-      .then((res) => res.json())
-      .then((data) => setRecentTransactions(data.slice(-5).reverse()));
+    (async () => {
+      try {
+        const [summaryRes, categoryRes, txRes] = await Promise.all([
+          fetchJson<Summary>(
+            `${API_BASE}/summary?start_date=${start}&end_date=${end}`,
+          ),
+          fetchJson<CategoryData[]>(
+            `${API_BASE}/summary/category?start_date=${start}&end_date=${end}`,
+          ),
+          fetchJson<Transaction[]>(
+            `${API_BASE}/transactions?start_date=${start}&end_date=${end}`,
+          ),
+        ]);
+
+        setSummary(summaryRes);
+        setCategoryData(categoryRes);
+        setRecentTransactions(txRes.slice(-5).reverse());
+      } catch (e) {
+        if ((e as { name?: string }).name !== "AbortError") {
+          console.error(e);
+        }
+      }
+    })();
+
+    return () => controller.abort();
   }, [range.start, range.end]);
 
   const pieData = categoryData.map((d) => ({
