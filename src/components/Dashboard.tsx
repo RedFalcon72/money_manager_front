@@ -30,6 +30,17 @@ type Transaction = {
   source: string;
 };
 
+type RangeMode = "thisMonth" | "lastMonth" | "custom";
+
+function getMonthRange(offset: number) {
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  const start = new Date(target.getFullYear(), target.getMonth(), 1);
+  const end = new Date(target.getFullYear(), target.getMonth() + 1, 0);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  return { start: fmt(start), end: fmt(end) };
+}
+
 export default function Dashboard() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
@@ -37,9 +48,19 @@ export default function Dashboard() {
     [],
   );
 
+  const [mode, setMode] = useState<RangeMode>("thisMonth");
+  const [customStart, setCustomStart] = useState(getMonthRange(0).start);
+  const [customEnd, setCustomEnd] = useState(getMonthRange(0).end);
+
+  const range =
+    mode === "thisMonth"
+      ? getMonthRange(0)
+      : mode === "lastMonth"
+        ? getMonthRange(-1)
+        : { start: customStart, end: customEnd };
+
   useEffect(() => {
-    const start = "2026-06-01";
-    const end = "2026-06-30";
+    const { start, end } = range;
 
     fetch(`http://127.0.0.1:8000/summary?start_date=${start}&end_date=${end}`)
       .then((res) => res.json())
@@ -56,86 +77,144 @@ export default function Dashboard() {
     )
       .then((res) => res.json())
       .then((data) => setRecentTransactions(data.slice(-5).reverse()));
-  }, []);
+  }, [range.start, range.end]);
 
   const pieData = categoryData.map((d) => ({
     name: d.category,
     value: Math.abs(d.total),
   }));
 
-  if (!summary) return <p className="p-6">Loading...</p>;
-
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
-          <p className="text-sm text-gray-500">収入</p>
-          <p className="text-2xl font-bold" style={{ color: "#ea4335" }}>
-            ¥{summary.income.toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
-          <p className="text-sm text-gray-500">支出</p>
-          <p className="text-2xl font-bold" style={{ color: "#1a73e8" }}>
-            ¥{Math.abs(summary.expense).toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
-          <p className="text-sm text-gray-500">収支</p>
-          <p className="text-2xl font-bold text-gray-800">
-            ¥{summary.balance.toLocaleString()}
-          </p>
-        </div>
+      <div className="flex gap-2 mb-6 items-center">
+        <button
+          onClick={() => setMode("thisMonth")}
+          className={`px-3 py-1 rounded text-sm ${
+            mode === "thisMonth"
+              ? "bg-blue-900 text-white"
+              : "bg-white border border-gray-200"
+          }`}
+        >
+          今月
+        </button>
+        <button
+          onClick={() => setMode("lastMonth")}
+          className={`px-3 py-1 rounded text-sm ${
+            mode === "lastMonth"
+              ? "bg-blue-900 text-white"
+              : "bg-white border border-gray-200"
+          }`}
+        >
+          先月
+        </button>
+        <button
+          onClick={() => setMode("custom")}
+          className={`px-3 py-1 rounded text-sm ${
+            mode === "custom"
+              ? "bg-blue-900 text-white"
+              : "bg-white border border-gray-200"
+          }`}
+        >
+          カスタム
+        </button>
+        {mode === "custom" && (
+          <>
+            <input
+              type="date"
+              value={customStart}
+              onChange={(e) => setCustomStart(e.target.value)}
+              className="border border-gray-200 rounded px-2 py-1 text-sm"
+            />
+            <span className="text-sm text-gray-500">〜</span>
+            <input
+              type="date"
+              value={customEnd}
+              onChange={(e) => setCustomEnd(e.target.value)}
+              className="border border-gray-200 rounded px-2 py-1 text-sm"
+            />
+          </>
+        )}
       </div>
 
-      <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100">
-        <h2 className="text-lg font-bold mb-4 text-gray-800">カテゴリ別支出</h2>
-        <PieChart width={400} height={300}>
-          <Pie
-            data={pieData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={100}
-          >
-            {pieData.map((_, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip
-            formatter={(value) => {
-              const numericValue = Array.isArray(value)
-                ? Number(value[0] ?? 0)
-                : Number(value ?? 0);
+      {!summary ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
+              <p className="text-sm text-gray-500">収入</p>
+              <p className="text-2xl font-bold" style={{ color: "#ea4335" }}>
+                ¥{summary.income.toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
+              <p className="text-sm text-gray-500">支出</p>
+              <p className="text-2xl font-bold" style={{ color: "#1a73e8" }}>
+                ¥{Math.abs(summary.expense).toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-white shadow-sm rounded-lg p-4 border border-gray-100">
+              <p className="text-sm text-gray-500">収支</p>
+              <p className="text-2xl font-bold text-gray-800">
+                ¥{summary.balance.toLocaleString()}
+              </p>
+            </div>
+          </div>
 
-              return `¥${numericValue.toLocaleString()}`;
-            }}
-          />
-          <Legend />
-        </PieChart>
-      </div>
+          <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">
+              カテゴリ別支出
+            </h2>
+            <PieChart width={400} height={300}>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+              >
+                {pieData.map((_, index) => (
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value) => {
+                  const numericValue = Array.isArray(value)
+                    ? Number(value[0] ?? 0)
+                    : Number(value ?? 0);
+                  return `¥${numericValue.toLocaleString()}`;
+                }}
+              />
+              <Legend />
+            </PieChart>
+          </div>
 
-      <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100 mt-4">
-        <h2 className="text-lg font-bold mb-4 text-gray-800">最近の取引</h2>
-        <table className="w-full">
-          <tbody>
-            {recentTransactions.map((t) => (
-              <tr key={t.id} className="border-b border-gray-100 last:border-0">
-                <td className="py-2 text-sm text-gray-500">{t.date}</td>
-                <td className="py-2 text-sm">{t.description}</td>
-                <td className="py-2 text-sm text-gray-500">{t.category}</td>
-                <td
-                  className="py-2 text-sm text-right font-bold"
-                  style={{ color: t.amount > 0 ? "#ea4335" : "#1a73e8" }}
-                >
-                  ¥{Math.abs(t.amount).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-100 mt-4">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">最近の取引</h2>
+            <table className="w-full">
+              <tbody>
+                {recentTransactions.map((t) => (
+                  <tr
+                    key={t.id}
+                    className="border-b border-gray-100 last:border-0"
+                  >
+                    <td className="py-2 text-sm text-gray-500">{t.date}</td>
+                    <td className="py-2 text-sm">{t.description}</td>
+                    <td className="py-2 text-sm text-gray-500">{t.category}</td>
+                    <td
+                      className="py-2 text-sm text-right font-bold"
+                      style={{ color: t.amount > 0 ? "#ea4335" : "#1a73e8" }}
+                    >
+                      ¥{Math.abs(t.amount).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 }
