@@ -115,7 +115,9 @@ export default function Import() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-lg font-bold mb-4 text-gray-800">CSVインポート</h1>
+      <h1 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
+        CSVインポート
+      </h1>
 
       <div
         onDragOver={(e) => {
@@ -124,14 +126,16 @@ export default function Import() {
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`bg-white shadow-sm rounded-lg border-2 border-dashed p-10 flex flex-col items-center justify-center text-center transition-colors ${
-          isDragging ? "border-[#1a73e8] bg-blue-50" : "border-gray-200"
+        className={`bg-white dark:bg-gray-800 shadow-sm rounded-lg border-2 border-dashed p-10 flex flex-col items-center justify-center text-center transition-colors ${
+          isDragging
+            ? "border-[#1a73e8] bg-blue-50 dark:bg-blue-900"
+            : "border-gray-200 dark:border-gray-600"
         }`}
       >
-        <p className="text-gray-500 mb-2">
+        <p className="text-gray-500 dark:text-gray-400 mb-2">
           CSVファイルをここにドラッグ&ドロップ
         </p>
-        <p className="text-gray-400 text-sm mb-4">または</p>
+        <p className="text-gray-400 dark:text-gray-500 text-sm mb-4">または</p>
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
@@ -150,30 +154,30 @@ export default function Import() {
       </div>
 
       {error && (
-        <div className="mt-4 bg-white shadow-sm rounded-lg p-4 border border-gray-100 text-sm text-[#ea4335]">
+        <div className="mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700 text-sm text-[#ea4335]">
           {error}
         </div>
       )}
 
       {lastResult && !error && (
-        <div className="mt-4 bg-white shadow-sm rounded-lg p-4 border border-gray-100 text-sm text-gray-800">
+        <div className="mt-4 bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 border border-gray-100 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-100">
           {lastResult.filename} を読み込み、{lastResult.result.saved}
           件を保存しました （{lastResult.result.imported}件中）。
         </div>
       )}
 
-      <div className="mt-8 bg-white shadow-sm rounded-lg p-6 border border-gray-100">
-        <h2 className="text-lg font-bold mb-4 text-gray-800">
+      <div className="mt-8 bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 border border-gray-100 dark:border-gray-700">
+        <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
           前回のインポート
         </h2>
         {history.length === 0 ? (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             インポート履歴はまだありません。
           </p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs text-gray-500">
+              <tr className="border-b border-gray-100 dark:border-gray-700 text-left text-xs text-gray-500 dark:text-gray-400">
                 <th scope="col" className="py-2 font-medium">
                   日付
                 </th>
@@ -187,8 +191,13 @@ export default function Import() {
             </thead>
             <tbody>
               {history.map((h, i) => (
-                <tr key={i} className="border-b border-gray-100 last:border-0">
-                  <td className="py-2 text-sm text-gray-500">{h.date}</td>
+                <tr
+                  key={i}
+                  className="border-b border-gray-100 dark:border-gray-700 last:border-0 text-gray-900 dark:text-gray-100"
+                >
+                  <td className="py-2 text-sm text-gray-500 dark:text-gray-400">
+                    {h.date}
+                  </td>
                   <td className="py-2 text-sm">{h.filename}</td>
                   <td className="py-2 text-sm text-right">{h.saved}件</td>
                 </tr>
